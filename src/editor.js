@@ -1,3 +1,5 @@
+import {Dimensions} from 'react-native';
+
 function getContentCSS() {
     /*img {max-width: 98%;margin-left:auto;margin-right:auto;display: block;}*/
     return `
@@ -52,7 +54,9 @@ function createHTML(options = {}) {
         * {outline: 0px solid transparent;-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-touch-callout: none;box-sizing: border-box;}
         html, body { margin: 0; padding: 0;font-family: Arial, Helvetica, sans-serif; font-size:1em; height: 100%}
         body { overflow-y: hidden; -webkit-overflow-scrolling: touch;background-color: ${backgroundColor};caret-color: ${caretColor};}
-        .content {font-family: Arial, Helvetica, sans-serif;color: ${color}; width: 100%;${!useContainer ? 'height:100%;' : ''}-webkit-overflow-scrolling: touch;padding-left: 0;padding-right: 0;}
+        .content {font-family: Arial, Helvetica, sans-serif;color: ${color}; width: 100%;${
+        !useContainer ? 'height:100%;' : ''
+    }-webkit-overflow-scrolling: touch;padding-left: 0;padding-right: 0;}
         .pell { height: 100%;} .pell-content { outline: 0; overflow-y: auto;padding: 10px;height: 100%;${contentCSSText}}
     </style>
     <style>
@@ -220,6 +224,12 @@ function createHTML(options = {}) {
             }
         }
 
+        function _focusOnPreviousPosition() {
+            var selection = window.getSelection();
+            selection.selectAllChildren(editor.content);
+            selection.collapseToEnd();
+        }
+        
         var _keyDown = false;
         function handleChange (event){
             var node = anchorNode;
@@ -366,6 +376,9 @@ function createHTML(options = {}) {
                 getHtml: function() { return editor.content.innerHTML; },
                 blur: function() { editor.content.blur(); },
                 focus: function() { focusCurrent(); },
+                focusOnPreviousPosition: function() {
+                    _focusOnPreviousPosition();
+                 },
                 postHtml: function (){ postAction({type: 'CONTENT_HTML_RESPONSE', data: editor.content.innerHTML}); },
                 setPlaceholder: function(placeholder){ editor.content.setAttribute("placeholder", placeholder) },
 
@@ -409,7 +422,7 @@ function createHTML(options = {}) {
                 if (!${useContainer}) return;
                 // var height = Math.max(docEle.scrollHeight, body.scrollHeight);
                 var height = editor.content.scrollHeight;
-                if (o_height !== height){
+                if (o_height !== height  && height < ${Dimensions?.get('screen').height}){
                     _postMessage({type: 'OFFSET_HEIGHT', data: o_height = height});
                 }
             },
